@@ -1,22 +1,19 @@
 package = 'avro'
 version = 'scm-1'
-source  = {
-    url    = 'git://github.com/oleggator/avro-lua.git',
+source = {
+    url = 'git://github.com/oleggator/avro-lua.git',
     branch = 'master',
 }
 description = {
-    summary  = "",
+    summary = "",
     homepage = '',
-    license  = 'MIT',
+    license = 'MIT',
 }
 dependencies = {
     'lua >= 5.1',
 }
-external_dependencies = {
-    TARANTOOL = {
-        header = "tarantool/module.h"
-    },
-}
+external_dependencies = {}
+
 build = {
     type = 'make',
 
@@ -25,6 +22,7 @@ build = {
         TARANTOOL_DIR = '$(TARANTOOL_DIR)',
         TARANTOOL_INSTALL_LIBDIR = '$(LIBDIR)',
         TARANTOOL_INSTALL_LUADIR = '$(LUADIR)',
+        CC = 'gcc',
     }
 }
 
