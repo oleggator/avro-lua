@@ -2,30 +2,30 @@ use std::{io::Read};
 use mlua::{LuaSerdeExt, prelude::*};
 use avro_rs::Schema;
 use std::convert::TryFrom;
+use std::sync::Arc;
 
-struct Decoder {
+struct Avro {
     schema: Schema,
 }
 
-impl Decoder {
+impl Avro {
     pub fn new(schema: &str) -> Result<Self, avro_rs::Error> {
-        Ok(Decoder {
+        Ok(Avro {
             schema: Schema::parse_str(schema)?,
         })
     }
 
-    pub fn decode<R: Read>(&self, reader: &mut R) -> Result<serde_json::Value, avro_rs::Error> {
-        let result = avro_rs::from_avro_datum(&self.schema, reader, None).unwrap();
-        let json_value = serde_json::Value::try_from(result).unwrap();
-
-        Ok(json_value)
+    pub fn decode<R: Read>(&self, reader: &mut R) -> Result<Value, avro_rs::Error> {
+        let avro_value = avro_rs::from_avro_datum(&self.schema, reader, None)?;
+        Ok(Value::try_from(avro_value)?)
     }
 }
 
-impl mlua::UserData for Decoder {
+impl mlua::UserData for Avro {
     fn add_methods<'lua, M: LuaUserDataMethods<'lua, Self>>(methods: &mut M) {
-        methods.add_method("decode", |lua, this: &Decoder, blob: LuaString| {
-            let json_value = this.decode(&mut blob.as_bytes()).unwrap();
+        methods.add_method("decode", |lua, this: &Avro, blob: LuaString| {
+            let json_value = this.decode(&mut blob.as_bytes())
+                .map_err(|err| mlua::Error::ExternalError(Arc::new(err)))?;
             lua.to_value(&json_value)
         });
     }
@@ -39,7 +39,8 @@ fn avro(lua: &Lua) -> LuaResult<LuaTable> {
         "new",
         lua.create_function_mut(|_, (schema, )| {
             let schema: String = schema;
-            let avro = Decoder::new(schema.as_str()).unwrap();
+            let avro = Avro::new(schema.as_str())
+                .map_err(|err| mlua::Error::ExternalError(Arc::new(err)))?;
             Ok(avro)
         })?,
     )?;
