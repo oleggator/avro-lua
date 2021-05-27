@@ -32,7 +32,9 @@ impl mlua::UserData for Avro {
         methods.add_method("decode", |lua, this: &Avro, blob: LuaString| {
             let json_value = this.decode(&mut blob.as_bytes())
                 .map_err(|err| mlua::Error::ExternalError(Arc::new(err)))?;
-            lua.to_value(&json_value)
+            lua.to_value_with(&json_value, LuaSerializeOptions::new()
+                .serialize_none_to_null(false)
+                .serialize_unit_to_null(false))
         });
 
         methods.add_method("encode", |lua, this: &Avro, table: LuaValue| {
