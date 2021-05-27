@@ -2,7 +2,7 @@ package = 'avro'
 version = 'scm-1'
 source = {
     url = 'git://github.com/oleggator/avro-lua.git',
-    branch = 'master',
+    branch = 'recursive-types',
 }
 description = {
     summary = "",
