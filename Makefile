@@ -3,4 +3,4 @@ build:
 	cargo build --release
 
 install:
-	cp target/release/libavro.so .rocks/lib/tarantool/avro.so || cp target/release/libavro.dylib .rocks/lib/tarantool/avro.dylib
+	cp target/release/libavro.so $(TARANTOOL_INSTALL_LIBDIR)/avro.so || cp target/release/libavro.dylib $(TARANTOOL_INSTALL_LIBDIR)/avro.dylib
