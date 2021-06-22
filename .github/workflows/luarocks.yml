@@ -1,0 +1,22 @@
+name: Build binary rock
+on: [push]
+jobs:
+  build-binary-rock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: tarantool/setup-tarantool@v1
+        with:
+          tarantool-version: '2.6'
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      - uses: actions/checkout@v2
+
+      - run: tarantoolctl rocks make
+      - run: tarantoolctl rocks pack avro
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: avro-scm-1.linux-x86_64.rock
+          path: '*.rock'
